@@ -1,0 +1,48 @@
+We are going to create a replica set with 3 dbs. 1 primary on port 30000, 1 secondary on port 40000 and 1 arbiter on port 50000
+
+Create folders db1, db2, db3 inside C:\db-mongo\db\
+========================================================================================
+Run the following command
+
+net start MongoDB
+
+@REM Primary
+start "a" mongod --dbpath C:\db-mongo\db\db1 --port 30000 --replSet "demo"
+@REM Secondary
+start "b" mongod --dbpath C:\db-mongo\db\db2 --port 40000 --replSet "demo"
+@REM Arbiter
+start "c" mongod --dbpath C:\db-mongo\db\db3 --port 50000 --replSet "demo"
+
+It should open 3 command prompts a,b and c
+
+start the primary by running: mongo --port 30000
+
+Configure replica set with 3 members using javascript object which will be configuration for our replica set
+var demoConfig = {_id: "demo", members: [{_id: 0, host: 'localhost:30000', priority: 10}, {_id: 1, host: 'localhost:40000'}, {_id: 2, host: 'localhost:50000', arbiterOnly: true}]};
+
+(**priority: low - high: high value makes it a Primary, if no server was declared as a primary)
+
+initiate the replica set: rs.initiate(demoConfig) // takes a while to run and give us back the prompt
+
+Press Enter (you should see demo:PRIMARY)
+
+db.foo.save({_id: 1, value: 'Hello World'}) // save a record in the primary
+db.foo.find() // you should see the record saved above
+
+open a new prompt and connect to secondary using mongo --port 40000
+
+run db.foo.find()
+
+you may see an error saying { "$err": "not master and slaveOk=false"} // this tells this is not master and has not been set as a slave,so you cannot read from it yet
+
+run db.setSlaveOk()
+
+run db.foo.find() // should see the record stored in primary
+
+==============================================================================================================
+
+To test if failover is working correctly or not
+
+Kill the primary by closing the "a" command prompt.
+Keep an eye on the secondary server command prompt. Soon, it will say demo:PRIMARY, meaning the secondary became the primary now.
+run: db.getMongo() // you will see that the primary is now on port 40000, previously it was on 30000 which we killed on purpose.
