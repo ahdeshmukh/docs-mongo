@@ -1,1 +1,3 @@
-- Primary (master) is the only writable instance, secondary DBs are read only. MongoDB has only 1 primary
+- Primary (master) is the only writable instance, secondary DBs are read only. MongoDB has only 1 primary.
+- Secondary and slave nodes are read-only nodes that replicate from the primary.
+- Arbiter is an empty member in replica set whose job is to vote to break the tie in the event of a MongoDB election if primary fails.
