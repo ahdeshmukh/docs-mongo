@@ -1,0 +1,3 @@
+List of Databases: show dbs
+currently selected database: db
+switch to different database: use <dbname> // eg: use foo

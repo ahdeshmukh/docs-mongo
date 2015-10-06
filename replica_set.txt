@@ -1,0 +1,1 @@
+- Primary (master) is the only writable instance, secondary DBs are read only. MongoDB has only 1 primary
