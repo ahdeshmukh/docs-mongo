@@ -1,0 +1,19 @@
+Rules for saving data
+1) A document must have _id. if you save one without _id, mongo will assign one for you.
+2) Size of document is limited to 16MB. If you want to store more, split it in multiple docs.
+
+"show collections" shows a list of all collections. If you save a single collection, mongodb creates one more collection called as system.indexes. This collection stores the information of the _id field described in Rule 1 above which is used for indexing the data.
+
+Saving data
+Mongo can have _id  which is numeric, float, string or a complex object with multiple fields in it. All the examples below are valid for data types for _id. The only data type excluded for _id is an array.
+db.foo.save({_id: 1 })
+db.foo.save({  _id: 3.14 })
+db.foo.save({ _id: "Hello" })
+db.foo.save({ _id: ISODate() })
+db.foo.save({ _id: {a: 'x', b:2 } })
+
+
+If an _id is not provided, mongo creates a unique _id and assigns it to the document. This _id also contains a timestamp which you can get to, using
+ObjectId().getTimestamp()
+Letting mongo create an _id is good for faster writes but slows down the reads.
+If you want faster reads, your application should create a unique _id and pass it to mongo for saving. ( i assume preferable auto increment integer ).
