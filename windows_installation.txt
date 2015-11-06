@@ -11,6 +11,6 @@
 	"C:\mongodb\bin\mongod.exe" --config "C:\mongodb\mongod.cfg" --install
 6) To start run command prompt as an administrator and give net start MongoDB.
 7) To confirm if the service is running issue "net start | findStr Mongo". you should see the MongoDB in the list.
-8) To stop issue net stop MongoDB
+8) To stop run "net stop MongoDB"
 9) Optional: Add C:\mongodb\bin to the PATH in the environment variable
-10) Once the MongoDB is started open another shell and type mongo. If everything goes well, you should see "connecting to test".
+10) Once the MongoDB is started open another shell and type "mongo". If everything goes well, you should see "connecting to test".
