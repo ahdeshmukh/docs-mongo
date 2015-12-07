@@ -22,7 +22,8 @@ var demoConfig = {_id: "demo", members: [{_id: 0, host: 'localhost:30000', prior
 
 (**priority: low - high: high value makes it a Primary, if no server was declared as a primary)
 
-initiate the replica set: rs.initiate(demoConfig) // takes a while to run and give us back the prompt
+initiate the replica set: rs.initiate(demoConfig) // takes a while to run and give us back the prompt.
+//You don't have to configure the replica set every time. It should be done only once during the setup.
 
 Press Enter (you should see demo:PRIMARY)
 
@@ -38,8 +39,6 @@ you may see an error saying { "$err": "not master and slaveOk=false"} // this te
 run db.setSlaveOk()
 
 run db.foo.find() // should see the record stored in primary
-
-You don't have to configure the replica set every time. It should be done only once during the setup.
 
 ==============================================================================================================
 
