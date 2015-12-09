@@ -75,6 +75,6 @@ Then final value of the document will be ({_id: 1, x: 11, y: 5}); which is what 
 
 Unset command
 if from the above example, we want to remove y: 5, we should use unset command as follows
-db.a.update({_id:1}, {$unset:{y:VAL}}) or db.a.update({_id:1}, {$unset:{y:VAL}})
+db.a.update({_id:1}, {$unset:{y:VAL}})
 where VAL is an arbitrary value like '' or 0. it is just a placeholder
 
