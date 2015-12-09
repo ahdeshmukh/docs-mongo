@@ -78,3 +78,44 @@ if from the above example, we want to remove y: 5, we should use unset command a
 db.a.update({_id:1}, {$unset:{y:VAL}})
 where VAL is an arbitrary value like '' or 0. it is just a placeholder
 
+Rename operator
+
+where id = any valid integer > 0
+
+db.a.save({_id: id, Naem: 'Bob'}); // notice we are using Naem instead of Name
+using the rename opertor we can fix it by doing
+db.a.update({_id: id}, {$rename: {'Naem': 'Name'}});
+
+Array operations
+Push operator
+db.foo.insert({_id: id});
+db.foo.update({_id: id}, {$push: {things: 'one'}}); // should look like {_id: id, things: ['one']}
+push some more items by doing 
+db.foo.update({_id: id}, {$push: {things: 'two'}}); 
+db.foo.update({_id: id}, {$push: {things: 'three'}});
+// if you do db.foo.update({_id: id}, {$push: {things: 'three'}}); again, foo has element 'three' twice inside the things array
+
+To prevent duplication of data as mentioned above, we can use $addToSet operator. this operator checks if an element exists in the set, and if not, then only adds it
+eg: db.foo.update({_id: id}, {$addToSet: {things: 'four'}});
+now if you do db.foo.update({_id: id}, {$addToSet: {things: 'four'}}); it will not add four again to the things array
+
+Pull operator
+To remove elements from an array
+eg: db.foo.update({_id: id}, {$pull: {things: 'three'}}); // will remove three from the things array
+
+Pop operator
+if you want to remove last element from an array, do db.foo.update({_id: id}, {$pop: {things: 1}});
+if you want to remove first element from an array, do db.foo.update({_id: id}, {$pop: {things: -1}});
+
+** pull, push, pop and addToSet operators are only allowed on arrays, otherwise mongoDB throws an error
+
+Multi Update
+Let's say we have multiple documents in the DB and if we want to apply update to several documents and push another element on them
+eg: db.foo.find() returns
+{"_id": 1, "things": [1,2,3]}
+{"_id": 2, "things": [2,3]}
+{"_id": 3, "things": [3]}
+
+if we want to push 4 to the things array in all the documents, we should do
+db.foo.update({}, {$addToSet: {things: 4}}, {multi: true});
+ 
