@@ -118,4 +118,7 @@ eg: db.foo.find() returns
 
 if we want to push 4 to the things array in all the documents, we should do
 db.foo.update({}, {$addToSet: {things: 4}}, {multi: true});
+
+if we only want to update those documents who have value 2 in the things array, we can give the following command
+db.foo.update({things: 2}, {$addToSet: {things: 5}}, {multi: true});
  
