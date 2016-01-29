@@ -59,8 +59,19 @@ query => which document you want to update ( same as id in sql db, so you do not
 update => change that you want to make to the document
 options => one, many, upsert (one => just update first matching documents, many => update all matching documents, upsert => if document is not found, insert a new document). options parameter is not compulsory. default is one and !upsert
 
-If in the above example, we want to increment the value of x by 1, we should use the update command
+Eg: 
+if db.user.find({_id: 1}) returns {_id: 1, name: 'Bob'}, and if we have to update name from Bob to Bobby, we will run
+db.users.update({_id: 1}, {$set: {name: 'Bobby'}})
+In the above example if name field does not exist, mongodb will create a name field with value Bobby for the document with id 1
+
+Updating nested field in a document
+eg: if db.user.find({_id: 1}) returns {_id: 1, name: 'Bob', info: {age: 30, nationality: 'American'}}
+now if we want to update the age which is a property of the info field, we will have to do
+db.user.update({_id: 1}, {$set: {info: {age: 31}}})
+
+
 db.a.save({_id:1, x:10});
+If we want to increment the value of x by 1, we should use the update command
 db.a.update({_id: 1}, {$inc:{x:1}});
 $inc is MongoDB increment operator.
 Even if two users try to concurrently increment the value of x, the update and $inc operator will make sure it will store the correct value in the db
@@ -79,12 +90,10 @@ db.a.update({_id:1}, {$unset:{y:VAL}})
 where VAL is an arbitrary value like '' or 0. it is just a placeholder
 
 Rename operator
-
-where id = any valid integer > 0
-
-db.a.save({_id: id, Naem: 'Bob'}); // notice we are using Naem instead of Name
-using the rename opertor we can fix it by doing
-db.a.update({_id: id}, {$rename: {'Naem': 'Name'}});
+where idx = any valid integer > 0
+db.a.save({_id: idx, Naem: 'Bob'}); // notice we are using Naem instead of Name
+using the rename operator we can fix it by doing
+db.a.update({_id: idx}, {$rename: {'Naem': 'Name'}});
 
 Array operations
 Push operator
@@ -122,3 +131,7 @@ db.foo.update({}, {$addToSet: {things: 4}}, {multi: true});
 if we only want to update those documents who have value 2 in the things array, we can give the following command
 db.foo.update({things: 2}, {$addToSet: {things: 5}}, {multi: true});
  
+Delete or remove a document from collection
+db.foo.remove(query, justOne);
+query => remove collection that matches the query. ( eg: db.foo.remove({_id:1}) )
+justOne => only delete first matching document. defaults to true

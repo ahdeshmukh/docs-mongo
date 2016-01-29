@@ -3,3 +3,4 @@ currently selected database: db
 switch to different database: use <dbname> // eg: use foo
 Confirm if service is running: net start | findStr Mongo
 List of collections: show collections
+Drop collections: db.foo.drop() where foo => name of the collection to drop

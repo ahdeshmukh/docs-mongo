@@ -1,0 +1,83 @@
+Animals collection
+db.animals.insert({"_id":1, "name":"Cat", "tags":["land","cute"], "info":{"type":"mammal", "color":"red"}});
+db.animals.insert({"_id":2, "name":"Rabbit", "tags":["land","cute"], "info":{"type":"mammal", "color":"white"}});
+db.animals.insert({"_id":3, "name":"Dolphin", "tags":["water","cute"], "info":{"type":"mammal", "color":"grey"}});
+db.animals.insert({"_id":4, "name":"Penguin", "tags":["land","cute","water"], "info":{"type":"bird", "color":"black"}});
+db.animals.insert({"_id":5, "name":"Duck", "tags":["land","cute","water"], "info":{"type":"bird", "color":"white", canFly: true}});
+db.animals.insert({"_id":6, "name":"Crocodile", "tags":["land","water"], "info":{"type":"reptile"}});
+db.animals.insert({"_id":7, "name":"Shark", "tags":["water"], "info":{"type":"fish", "color":"grey"}});
+db.animals.insert({"_id":8, "name":"Tiger", "tags":["land"], "info":{"type":"mammal", "color":"yellow"}});
+db.animals.insert({"_id":9, "name":"Lion", "tags":["land"], "info":{"type":"mammal", "color":"tan"}});
+db.animals.insert({"_id":10, "name":"Eagle", "tags":["land"], "info":{"type":"bird", "color":"brown", canFly: true}});
+
+
+Find command
+db.foo.find(query, projection)
+query => filter, defines matching criteria to run against the documents. optional, if not specified returns all documents from the collection.
+projection => which fields should be returned (eg: select id, name from user). projection is optional and by default all fields are returned (select * from user)
+
+eg:
+db.animals.find({_id: 1}) // find document with _id = 1
+if we want to see only the name, we can do the following. ( note: _id field will be returned always, unless you explicitly exclude it using {_id: 0} in the projection )
+db.animals.find({_id: 1}, {name: 1}) // getting name fields by inclusion
+db.animals.find({_id: 1}, {tags: 0, info: 0}) // getting name fields by exclusion
+
+
+Greater than and Lesser than
+find all animals having _id > 4. 
+db.animals.find({_id: {$gt: 4}}, {name: 1}) // $gt => greater than
+
+find all animals having _id < 4. 
+db.animals.find({_id: {$lt: 4}}, {name: 1}) // $lt => lesser than
+
+find all animals having _id >= 4. 
+db.animals.find({_id: {$gte: 4}}, {name: 1}) // $gte => greater than or equal to
+
+find all animals having _id <= 4. 
+db.animals.find({_id: {$lte: 4}}, {name: 1}) // $lte => lesser than or equal to
+
+specifying a range. find all animals having _id > 2 and _id < 5
+db.animals.find({_id: {$gt: 2, $lt: 5}}, {name: 1})
+
+find documents whose _id is not greater than 2.
+db.animals.find({_id: {$not: {$gt: 2}}}, {name: 1}) // we can using db.animals.find({_id: {$lte: 2}}, {name: 1}), but this is another way of doing it using $not
+
+find documents whose _id values are 1 or 3
+db.animals.find({_id: {$in: [1,3]}}, {name: 1})
+
+find documents whose _id values are not 1 or 3
+db.animals.find({_id: {$nin: [1,3]}}, {name: 1})
+
+find documents which has tag 'cute'
+db.animals.find({tags: 'cute'}, {name: 1})
+Note: field values are case sensitive. db.animals.find({tags: 'Cute'}, {name: 1}) will not match
+Note: field names are also case sensitive. db.animals.find({Tags: 'cute'}, {name: 1})
+
+find animals that have tag cute or water.
+db.animals.find({tags: {$in: ['cute', 'water']}}, {name: 1})
+
+find animals that have tag cute and water.
+db.animals.find({tags: {$all: ['cute', 'water']}}, {name: 1})
+
+find animals that can fly ( Dot notation at work )
+db.animals.find({"info.canFly": true})
+CAUTION: BSON is stored as a blob and mongo searches for exact match.
+So for the above data that we have inserted for animals,
+db.animals.find({info: {type: 'bird', canFly: true}}, {name: 1}) will not return anything
+even db.animals.find({info: {type: 'bird'}}, {name: 1}) will not return anything
+To fix this we will have to use dot notation as follows
+db.animals.find({"info.type": 'bird', "info.canFly": true}, {name: 1})
+
+AND operation (comma between the fields performs an AND)
+db.animals.find({"info.type": 'bird', "tags": 'cute'}, {name: 1})
+db.animals.find({"info.type": 'bird', "tags": {$in: ['cute', 'water']}}, {name: 1})
+
+
+PROJECTION
+To choose which fields are returned by the query, set their value to 1 in the projection
+eg: db.animals.find({_id: 1}, {name: 1}) // returns only name and _id field
+To exclude fields, set value to 0
+eg: db.animals.find({_id: 1}, {name: 0}) // returns all fields except name
+To exclusively exclude the _id field, we have to set it to 0, otherwise it will be returned
+eg: db.animals.find({_id: 1}, {_id: 0})
+CAUTION: you cannot mix and match. eg: db.animals.find({_id: 1}, {name: 1, info: 0}) will cause mongo to throw an error. either you include them or exclude them
