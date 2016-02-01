@@ -81,3 +81,18 @@ eg: db.animals.find({_id: 1}, {name: 0}) // returns all fields except name
 To exclusively exclude the _id field, we have to set it to 0, otherwise it will be returned
 eg: db.animals.find({_id: 1}, {_id: 0})
 CAUTION: you cannot mix and match. eg: db.animals.find({_id: 1}, {name: 1, info: 0}) will cause mongo to throw an error. either you include the fields or exclude them
+
+Sort
+db.animals.find({}, {name: 1}).sort({name: 1}) // sort by name ASC
+db.animals.find({}, {name: 1}).sort({name: -1}) // sort by name DESC
+db.animals.find({}, {name: 1, info: 1}).sort({"info.type": 1, name: 1}) // multi value sort
+
+Limit
+db.animals.find({}, {name: 1}).limit(3)
+db.animals.find({}, {name: 1}).sort({name: 1}).limit(3) //Limit after sorting
+
+Skip. (paging, like limit 0, 10 from sql query)
+db.animals.find({}, {name: 1}).sort({name: 1}).skip(1).limit(2) // same as select * from animals order by name asc limit 1,2
+
+find one // just returns 1 record
+db.animals.findOne({_id: 1})
