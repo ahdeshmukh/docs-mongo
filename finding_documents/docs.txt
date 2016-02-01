@@ -69,8 +69,8 @@ To fix this we will have to use dot notation as follows
 db.animals.find({"info.type": 'bird', "info.canFly": true}, {name: 1})
 
 AND operation (comma between the fields performs an AND)
-db.animals.find({"info.type": 'bird', "tags": 'cute'}, {name: 1})
-db.animals.find({"info.type": 'bird', "tags": {$in: ['cute', 'water']}}, {name: 1})
+db.animals.find({"info.type": 'bird', "tags": 'cute'}, {name: 1}) // info.type = 'birds' AND tags has 'cute' since it is an array
+db.animals.find({"info.type": 'bird', "tags": {$in: ['cute', 'water']}}, {name: 1}) // info.type = 'birds' AND tags has 'cute' or 'water'
 
 
 PROJECTION
@@ -80,4 +80,4 @@ To exclude fields, set value to 0
 eg: db.animals.find({_id: 1}, {name: 0}) // returns all fields except name
 To exclusively exclude the _id field, we have to set it to 0, otherwise it will be returned
 eg: db.animals.find({_id: 1}, {_id: 0})
-CAUTION: you cannot mix and match. eg: db.animals.find({_id: 1}, {name: 1, info: 0}) will cause mongo to throw an error. either you include them or exclude them
+CAUTION: you cannot mix and match. eg: db.animals.find({_id: 1}, {name: 1, info: 0}) will cause mongo to throw an error. either you include the fields or exclude them
