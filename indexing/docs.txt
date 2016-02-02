@@ -1,0 +1,67 @@
+Indexing
+
+The Problem ( with regular queries )
+db.foo.find({x: 10})
+The server does (pseudo code)
+for each doc d in 'foo' {
+	if(d.x == 10) {
+		return d;
+	}
+}
+This approach reads every document and returns the document where the condition matches.
+
+Indexing to the rescue
+Index - field 'x', from collection 'foo'
+value 9 => [171, 819, 2309] // here the numbers 171, 819 etc are not the _id, but you can think of disc location
+value 10 => [4372]
+
+if we use the index, the above query will look into index, pick the disk locations whose value is 10, fetch the document and return it, instead of scanning the entire collection.
+
+Mongo => type of indexes
+Regular (B-Tree)
+Geo => supports proximity of point, helpful in doing queries like find restaurants around location
+Text => allows searches like search engines
+Hashed => mainly used in context of sharding
+TTL (time to live) => supports expiring document using datetime field. we can set expiration time and mongo will remove the document when this time is reached.
+
+Create Index
+db.foo.ensureIndex(keys, options)
+foo => collection
+keys => which fields, in what order, Geo/Text
+options => name, build now, unique, spare, TTL, language
+
+Check which index exists for a collection
+db.system.indexes.find({ns: 'test.animals'},{key: 1})
+where ns => name space, test => db, animals => collection
+Note: just showing which keys are available. you can skip {key: 1} part to see everything related to the index
+
+To create an index, doc
+db.foo.ensureIndex({fieldName: value})
+where foo =>  collection, fieldName =>name of the field we want to index, value => 1 or -1 (1 for sort asc, -1 for sort desc)
+eg: To index name field from animals collection in ascending order, we will do db.animals.ensureIndex({name: 1})
+
+How to tell if mongo uses an index
+using explain(). eg: db.animals.find({name: 'Cat'}).explain()
+mongo will not return data, but information about how mongo is going about finding that document
+check for winning plan. if mongo is using index, you will see a field indexName with the name of index it is using
+
+Multi term query
+Now we have indexed name from collection animals
+If we using multi term query like db.animals.find({name: 'Cat', tags: 'land'}), mongo will still use the index.
+you can confirm this by doing db.animals.find({name: 'Cat', tags: 'land'}).explain()
+
+Comparison
+Index is used in comparison queries too
+db.animals.find({name:{$lt:'Dog'}}, {name:1}) //find all docs whose name < dog in alphabetical order
+Note: this is case sensitive. if instead of 'Dog', we use 'dog', mongo will return all the records
+
+Drop Index
+db.foo.dropIndex('nameOfIndex')
+eg: first find name of index to be dropped using
+db.system.indexes.find({ns: 'test.animals'},{name: 1}) 
+then drop it using db.animals.dropIndex('nameOfIndex')
+Note: cannot drop index with name _id_
+
+Nested fields
+mongo supports indexing on nested fields. eg: for the animals collection, we can index the color which is inside info using dot notation as follows
+db.animals.ensureIndex({"info.color":1})
