@@ -12,7 +12,7 @@ This approach reads every document and returns the document where the condition 
 
 Indexing to the rescue
 Index - field 'x', from collection 'foo'
-value 9 => [171, 819, 2309] // here the numbers 171, 819 etc are not the _id, but you can think of disc location
+value 9 => [171, 819, 2309] // here the numbers 171, 819 etc are not the _id, but you can think of pointers on the disc location
 value 10 => [4372]
 
 if we use the index, the above query will look into index, pick the disk locations whose value is 10, fetch the document and return it, instead of scanning the entire collection.
@@ -52,7 +52,7 @@ you can confirm this by doing db.animals.find({name: 'Cat', tags: 'land'}).expla
 
 Comparison
 Index is used in comparison queries too
-db.animals.find({name:{$lt:'Dog'}}, {name:1}) //find all docs whose name < dog in alphabetical order
+db.animals.find({name:{$lt:'Dog'}}, {name:1}) //find all docs whose name < Dog in alphabetical order
 Note: this is case sensitive. if instead of 'Dog', we use 'dog', mongo will return all the records
 
 Drop Index
@@ -65,3 +65,65 @@ Note: cannot drop index with name _id_
 Nested fields
 mongo supports indexing on nested fields. eg: for the animals collection, we can index the color which is inside info using dot notation as follows
 db.animals.ensureIndex({"info.color":1})
+
+Array fields
+mongo supports indexing on array fields. when we index the array, each element in the array is indexed as a value, creating what is called a multi key index.
+db.animals.ensureIndex({tags:1})
+
+Unique Index
+db.animals.ensureIndex({name:1}, {unique: true})
+In this case if an animal with name 'Cat' exists and if we try to do db.animals.insert({name: 'Cat'}), mongo will throw an error
+
+Sparse Index
+Find animals which have color: db.animals.find({"info.color":{$exists:true}})
+Find animals which do not have color: db.animals.find({"info.color":{$exists:false}})
+Now if we do a regular index on info.color, mongo will index all documents
+But if we want make sure only those documents which have info.color are indexed, we need to use sparse index as follows
+db.animals.ensureIndex({"info.color":1},{sparse:true})
+
+
+Compound Indexes
+Creating combined indexes on different fields by using db.animals.ensureIndex({tags:1, name:1})
+if we run db.animals.find({tags:'water',name:'Shark'}).explain() or db.animals.find({name:'Shark',tags:'water'}).explain(), we can notice mongodb uses index
+if we run db.animals.find({tags:'water'}).explain(), mongodb still uses index.
+But if we just use one of the terms of index which is not the first term mongodb will not use index
+eg: db.animals.find({name:'Shark'}).explain() will not use index
+
+Sort Direction
+db.animals.ensureIndex({tags:1, name:1}) // wehave mentioned what sort direction should be used. in this case tags - ASC and name - ASC
+The following sort queries will use the index since they are sorted in a direction supported by the index
+	db.animals.find().sort({tags:1,name:1}).explain()
+	db.animals.find().sort({tags:-1,name:-1}).explain()
+	db.animals.find().sort({tags:1}).explain()
+	db.animals.find().sort({tags:-1}).explain()
+The following sort queries will not use the index since they are not sorted in a direction supported by the index
+	db.animals.find().sort({tags:1,name:-1}).explain()
+	db.animals.find().sort({tags:-1,name:1}).explain()
+	db.animals.find().sort({name:1}).explain()
+	db.animals.find().sort({name:-1}).explain
+	
+
+Covering index
+if we have indexed name field using db.animals.ensureIndex({name: 1})
+while getting back the record, if we require to see only the names of the animals that match our query criteria, we should make sure we do db.animals.find({name: 'Cat'},{name: 1, _id: 0})
+The advantage of doing this is mongo does not have to visit the document on the disk to return the data, but can directly pick it from the index and return it since the index contains name and we only asked for it. If we ask for additional fields that are not stored in the index, mongo has to access the entire document after getting it's location from the index.
+
+
+Dead weight
+MongoDB is schema less. So mongo doesn't know what fields we will have in the future, nor does it keep any such record of the existing fields in any central location. So we are allowed to create index on a field which doesn't match any of our documents.
+eg: db.animals.ensureIndex({zzz:1}) is perfectly legal even though zzz does not exist in any document in the animal collection. Mongo will create an index if asked to do so, and will happily use it if any future document contains a field zzz
+NOTE: Be careful, if you misspell a field name, mongo will not throw an error or notify you about it. It will create an extra index which may not be used until such a field exists in a document.
+
+Background build
+When you are create an index using db.animals.ensureIndex({name: 1}), the index is going to be built in the foreground. When the build index process is going on, all the read and write operations are blocked. To keep the read and write operations active while building the index, we can use db.animals.ensureIndex({name: 1}, {background: true}).
+NOTE: background index builds are slower and the index structure is much larger. So we have 2 choices to build index on PROD. either take a break and block read and write for sometime while you build the index or build index in the background.
+
+Index name
+Mongo lets us create compound indexes with upto 31 fields. The name of the indexes is by concatenating the names of the fieldseg: db.animals.ensureIndex({name: 1, tags: 1}) will create an index by the name name_1_tags_1.
+if you are using a lot of fields or the field names are very long, the generated index name will be quite long. It might hit against 128 character limit hat mongo imposes on the indexes name. This 128 also includes the name of the collection.
+To resolve this, you can specify the name of the index when you create the index as follows
+db.animals.ensureIndex({name:1, tags: 1, 'info.color': 1}, {name:'small_index_name'})
+You can verify the small index name by doing db.system.indexes.find({ns: 'test.animals'},{key: 1, name: 1}).pretty()
+
+
+USE Indexes. Query performace without indexing will degrade as the DB becomes large
