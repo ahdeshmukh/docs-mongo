@@ -1,16 +1,25 @@
 1) Download mongodb for windows. (https://www.mongodb.org/downloads#production)
+
 2) Create folders in C:/ called mongodb and db-mongodb. Run the .msi file. Select custom install and then select C:/mongodb as installation location
+
 3) Create data and log folders inside db-mongo
+
 4) Create file mongod.cfg inside C:/mongodb with the following content
 	systemLog:
 		destination: file
 		path: c:\db-mongo\log\mongod.log
 	storage:
 		dbPath: c:\db-mongo\db
+
 5) Install the MongoDB service by starting mongod.exe with the --install option and the -config
 	"C:\mongodb\bin\mongod.exe" --config "C:\mongodb\mongod.cfg" --install
+
 6) To start run command prompt as an administrator and give net start MongoDB.
+
 7) To confirm if the service is running issue "net start | findStr Mongo". you should see the MongoDB in the list.
+
 8) To stop run "net stop MongoDB"
+
 9) Optional: Add C:\mongodb\bin to the PATH in the environment variable
+
 10) Once the MongoDB is started open another shell and type "mongo". If everything goes well, you should see "connecting to test".
