@@ -1,0 +1,18 @@
+Getting some data
+https://docs.mongodb.com/getting-started/shell/import-data/
+
+Retrieve the dataset from https://raw.githubusercontent.com/mongodb/docs-assets/primer-dataset/primer-dataset.json and save to a file called as restaurants.json on the Desktop
+
+Import data into restaurants collection using
+mongoimport --db test --collection restaurants --drop --file path_to_restaurants.json file
+
+--drop ensures that if the collect already exists, then it is dropped first and then a new one is created
+
+This creates collection on port 27017
+
+If we want to create the collection on specific port use mongoimport --db test --collection restaurants --port portNumber --drop --file path_to_restaurants.json file
+
+eg: mongoimport --db test --collection restaurants --port 30000 --drop --file C:\Users\deshmukha\Desktop\restaurants.json
+
+(port number is 30000 because I am starting the primary on 30000)
+
