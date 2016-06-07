@@ -73,6 +73,16 @@ db.animals.find({"info.type": 'bird', "tags": 'cute'}, {name: 1}) // info.type =
 db.animals.find({"info.type": 'bird', "tags": {$in: ['cute', 'water']}}, {name: 1}) // info.type = 'birds' AND tags has 'cute' or 'water'
 
 
+Restaurants collection - example: refer to importing docs for how I got the data
+
+Find documents where restaurant name is not empty string
+db.restaurants.find({"name" : {"$exists" : true, "$ne" : ""}}) // making sure name exists and it is not empty
+
+Find documents where restaurant name is not empty or not null
+db.restaurants.find({$and:[{"name": {"$ne": null}}, {"name": {"$ne": ""}}]}) // do not need 
+$exists. "$ne": null takes care of it
+
+
 PROJECTION
 To choose which fields are returned by the query, set their value to 1 in the projection
 eg: db.animals.find({_id: 1}, {name: 1}) // returns only name and _id field
