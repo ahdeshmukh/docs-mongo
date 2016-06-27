@@ -1,19 +1,19 @@
 Uses restaurant collection created using mongo import
 
-1) Find a count of all the restaurants
+=> Find a count of all the restaurants
 db.restaurants.aggregate({"$group": {"_id": "all", "sum": {"$sum": 1}}})
 Similar to parsing through each document and incrementing the count by 1 each time
 Can be easily achieved using db.restaurants.count()
 
 
-2) Find the counts of all restaurants group by boroughs
+=> Find the counts of all restaurants group by boroughs
 db.restaurants.aggregate({"$group": {"_id": "$borough", "sum": {"$sum": 1}}})
 
-3) Order by name of restaurant ascending
+=> Order by name of restaurant ascending
 db.restaurants.find().sort({name: 1})
 db.restaurants.find({}, {name: 1}).sort({name: 1})
 
-4) Find count, average value of restaurant_id, min restaurant_id and max restaurant_id all in one query
+=> Find count, average value of restaurant_id, min restaurant_id and max restaurant_id all in one query
 db.restaurants.aggregate(
 	{"$group": {
 			"_id": "all", 
@@ -25,7 +25,16 @@ db.restaurants.aggregate(
 	}
 )
 
-5) Rules
+=> Find the average grade of restaurants group by restaurant (Note that we can use . notation in "$grades.score")
+db.restaurants.aggregate(
+	{"$group": {
+			"_id": "$restaurant_id",
+			"avg": {"$avg": "$grades.score"}
+		}
+	}
+)
+
+=> Rules
 a) The key of the group by field should be "_id"
 eg: db.restaurants.aggregate({"$group": {"_id": "all", "sum": {"$sum": 1}}})
 eg: db.restaurants.aggregate({"$group": {"_id": "$borough", "sum": {"$sum": 1}}})
