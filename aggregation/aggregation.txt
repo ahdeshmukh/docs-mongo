@@ -60,3 +60,39 @@ db.restaurants.aggregate(
 The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.
 
 Consider a document in a collection test containing an array field letters:
+{ _id: 1, letters: ["a", "b"] }
+
+The following operation appends the array [ "c", "d" ] to the letters field:
+db.test.update(
+   { _id: 1 },
+   { $addToSet: {letters: [ "c", "d" ] } }
+)
+
+he letters array now includes the [ "c", "d" ] array as an element:
+{ _id: 1, letters: [ "a", "b", [ "c", "d" ] ] }
+
+To add each element of the value separately, use the $each modifier with $addToSet
+Eg: A collection inventory has the following document:
+{ _id: 1, item: "cable", tags: [ "electronics", "supplies" ] }
+
+Then the following operation uses the $addToSet operator with the $each modifier to add multiple elements to the tags array:
+db.inventory.update(
+   { _id: 1 },
+   { $addToSet: { tags: { $each: [ "camera", "electronics", "accessories" ] } } }
+ )
+
+The operation adds only "camera" and "accessories" to the tags array since "electronics" already exists in the array. The results look like:
+{
+  _id: 1,
+  item: "cable",
+  tags: [ "electronics", "supplies", "camera", "accessories" ]
+}
+
+=> Push
+Pushes data to the array. Even the duplicates
+
+Example usage of addToSet and push
+
+If you have a blog and want to see how many different users commented on an article, you can use addToSet, by grouping on the article id and addToSet the commenter id.
+
+If we want to analyze the level of engagement, we can use push. This will tell us how many times a user has commented on the article and help find who are active users.
