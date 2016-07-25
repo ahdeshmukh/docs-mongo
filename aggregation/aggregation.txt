@@ -54,3 +54,9 @@ db.restaurants.aggregate(
 		}
 	}
 )
+
+
+=> Add to Set ($addToSet)
+The $addToSet operator adds a value to an array unless the value is already present, in which case $addToSet does nothing to that array.
+
+Consider a document in a collection test containing an array field letters:
