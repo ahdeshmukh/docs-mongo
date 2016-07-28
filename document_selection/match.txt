@@ -1,0 +1,10 @@
+Match operator ($match) is good for performance. MongoDB aggregation is done in memory and would fail if the memory consumption reaches 10%. Using $match we can reduce the result set by filtering the unwanted data, which will help in improving the processing.
+
+$match is a pipeline operator. So unlike the find command, it can be used multiple times in the pipeline before or after other pileline operators. 
+
+eg: Find all animals with tag water
+db.animals.aggregate({$match:{tags:'water'}})
+
+Compound match is like a logical AND
+eg: Find animals with tag water and info.type bird
+db.animals.aggregate({$match:{"tags":'water', "info.type":'bird'}})
