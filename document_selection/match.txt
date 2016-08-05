@@ -1,6 +1,6 @@
 Match operator ($match) is good for performance. MongoDB aggregation is done in memory and would fail if the memory consumption reaches 10%. Using $match we can reduce the result set by filtering the unwanted data, which will help in improving the processing.
 
-$match is a pipeline operator. So unlike the find command, it can be used multiple times in the pipeline before or after other pileline operators. 
+$match is a pipeline operator. So unlike the find command, it can be used multiple times in the pipeline before or after other pipeline operators. 
 
 eg: Find all animals with tag water
 db.animals.aggregate({$match:{tags:'water'}})
@@ -8,3 +8,16 @@ db.animals.aggregate({$match:{tags:'water'}})
 Compound match is like a logical AND
 eg: Find animals with tag water and info.type bird
 db.animals.aggregate({$match:{"tags":'water', "info.type":'bird'}})
+
+match with sort and limit
+eg: Find animals with tag water and info.type bird order by name descending limit 5
+db.animals.aggregate({$match:{"tags":'water', "info.type":'bird'}}, {$sort: {"name": -1}}, {$limit: 5})
+
+eg: get all animals, sort by name ascending
+db.animals.aggregate({$sort: {"name": 1}})
+
+$sort is able to take advantage of index
+
+group by
+eg: find the count of animals, group by info.type. // SELECT info_type, count(*) from animals group by info_type
+db.animals.aggregate({$group: {_id: "$info.type", num: {$sum : 1}}}) 
