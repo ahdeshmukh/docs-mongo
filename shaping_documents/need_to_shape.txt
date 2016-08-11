@@ -1,0 +1,10 @@
+Sometimes we have data in a complex format that needs to be reshaped to query it and get results
+
+eg: we have data like
+{"_id":1, "name":"Cat", "tags":["land","cute"], "info":{"type":"mammal", "color":"red"}}
+{"_id":3, "name":"Dolphin", "tags":["water","cute"], "info":{"type":"mammal", "color":"grey"}}
+{"_id":10, "name":"Eagle", "tags":["land"], "info":{"type":"bird", "color":"brown", canFly: true}}
+
+If we notice the "tags" is an array
+
+Now if we want to group by the animals by individual tags value ("land", "water"), we will need to reshape this document so that we can use these individual values in grouping. Right now, based on the example above, we cannot group by the values in the "tags", unless we reshape the documents.

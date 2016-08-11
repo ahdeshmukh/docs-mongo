@@ -1,0 +1,74 @@
+$unwind operator only works on array
+
+eg: run db.animals.find()
+YOu will notice the list of animals with tags as an array
+
+now if we do db.animals.aggregate({"$unwind":"$tags"}), you will notice tags is no longer an array, but a single string value field. You will notice that the rest of the data is repeated and the only difference will be in the value of tags.
+
+eg: {"_id":1, "name":"Cat", "tags":["land","cute"], "info":{"type":"mammal", "color":"red"}}
+will become
+{"_id":1, "name":"Cat", "tags":"land", "info":{"type":"mammal", "color":"red"}}
+{"_id":1, "name":"Cat", "tags":"cute", "info":{"type":"mammal", "color":"red"}}
+
+
+Remember, MongoBD is schemaless
+So if you try to $unwind on a field which does not exist, MongoDB does not throw an error, but returns empty data
+eg: on running db.animals.aggregate({"$unwind":"$fakeField"}), we will get no results back. SO basically $unwind can also be used as a filter.
+
+If we try to $unwind on a field which is not an array, MongoBD throws are error.
+
+Real usage of unwind
+
+eg: if we have the following document in test collection, and we want to get the total number of steps with action start
+{
+  'id': 1,
+  'steps': [
+    {
+      action: 'start',
+      info: 'foo'
+    },
+    {
+      action: 'stop',
+      info: 'bar'
+    }
+  ]
+}
+
+To achieve this, we can simply do db.test.count({"steps.action":"start"});
+
+But this will fail if steps has steps inside it with action start. (look at parent step and child step)
+eg:
+{
+  'id': 1,
+  'steps': [
+    {
+      action: 'start',
+      info: 'parent step foo',
+      steps: {
+       action: 'start',
+       info: 'child step foo'
+      }
+    },
+    {
+      action: 'stop',
+      info: 'bar'
+    }
+  ]
+}
+
+To get the totat exact count of steps which have start action, including the children steps, we need to run the following
+db.test.aggregate({$unwind:"$steps"}, {$match:{"steps.action":"start"}},{ $group: { _id: null, count: { $sum: 1 } } })
+
+Basically $unwind can be used to feed the next operation in the pipeline
+
+
+Example
+Get the names of the animals with number of tags associated with them, order by number of tags DESC, name ASC. output should look like
+{"name": "Duck:, "numOfTags": 3}
+{"name: "penguin": "numOfTags": 3}
+.
+.
+.
+
+
+db.animals.aggregate({$unwind: "$tags"}, {"$group": {"_id": {"_id": "$_id", "name": "$name"}, "numOfTags": {"$sum": 1}}}, {"$sort": {"numOfTags": -1, "name": 1}}, {"$project": {"numOfTags": 1, "_id.name": 1}},{"$project": {"name": "$_id.name", "numOfTags": 1, "_id": 0}})

@@ -1,0 +1,32 @@
+To make efficient use of memory and IO, we don't want to load the whole document into every stage of the pipeline.
+Eg: In SQL, we should not do Select * from foo, unless absolutely necessary. We should do Select id, name, .. from foo
+
+Eg: from the animals collection, we only want name and tags, we would do
+db.animals.aggregate({"$project": {"name":1, "tags":1}})
+
+Eg: from the animals collection, we only want name and color from the info , we would do
+db.animals.aggregate({"$project": {"name":1, "info.color":1}})
+
+Mongo returns the _id field by default. We need to explicitly exclude it if we don't need it
+db.animals.aggregate({"$project": {"name":1, "tags":1, "_id": 0}})
+
+Project can be used multiple times
+Eg: only give the names of animals that can fly
+db.animals.aggregate({$project:{"name": 1, "info.canFly": 1}}, {$match:{"info.canFly": true}}, {$project:{"name":1, "_id":0}});
+Notice in the first $project, we need to include "info.canFly", since we need that data to be fed to next pipeline operator $match. If we do not include it, we will get no results. To just show the name, we can exclude inf.canFly from the last $project
+
+Important note
+$project does not just cosmetically hide the fields. It creates a new document altogether that is being feed to next pipeline operator
+
+FIELD RENAMING
+
+Give us names of animals along with their info.type
+db.animals.aggregate({$project: {"name":1, "info.type": 1, "_id": 0}})
+
+Now this time, give me the above results but rename make sure info.type is called "type of animal"
+db.animals.aggregate({$project: {"name":1, "info.type": 1, "_id": 0}},{$project: {"name":1, "type of animal": "$info.type"}})
+
+
+COMPOUND CONDITIONAL
+Give names of animals. If name == 'Tiger' print 'It is a tiger', else 'Not a tiger'
+db.animals.aggregate([{$project:{name:1,result:{$cond:{if:{$eq:["$name","Tiger"]},then:"It is a tiger",else:"Not a tiger"}}}}])

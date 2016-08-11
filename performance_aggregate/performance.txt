@@ -1,0 +1,10 @@
+Performance is very important and we can follow basic steps to increase it  drastically.
+
+Do not feed unnecessary data.
+
+
+RULES OF THUMB
+Match early - to weed out unwanted data
+Project trim - to remove unnecessary fields
+Use Indexes - they assist in match and sort. Use them whenever applicable.
+sort before $group, $unwind
